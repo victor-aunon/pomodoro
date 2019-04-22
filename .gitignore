@@ -1,0 +1,8 @@
+# Folders
+tomato-env
+__pycache__
+.vscode
+
+# Files
+app.db
+.env

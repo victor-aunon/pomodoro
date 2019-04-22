@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1 align="center" class="description"">Pomodoro timer enhanced, boost your productivity</h1>
+    <div class="row" align="center" style="width: 60%;">
+        <div class="col-md-1" style="width:47.5%;">
+            <div class="timer" id="minutes">
+                
+            </div>
+        </div>
+        <div class="col-md-1" style="width:5%;" >
+            <div class="timer_separator">:
+
+            </div>
+        </div>
+        <div class="col-md-1" style="width:47.5%;">
+            <div class="timer" id="seconds">
+
+            </div>
+        </div>
+    </div>
+    <div class="row" align="center">
+            <table>
+                <tr>
+                    <td style="width: 50%; margin-right: 10px;">
+                    </td>
+                    <td style="width: 50%; margin-left: 10px;">
+                        <button type="button" class="btn btn-danger" onclick="clearTimer()">Stop</button>
+                    </td>
+                </tr>
+            </table>
+    </div>
+{% endblock %}
