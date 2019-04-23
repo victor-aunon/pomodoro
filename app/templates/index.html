@@ -24,20 +24,26 @@
         </table>
     </div>
     <div class="row" align="center" style="width: 60%; margin: 20px;">
-        <div class="btn-group btn-group-justified" role="group" aria-label="..."  align="center">
-            <button type="button" class="btn btn-success" style="width: 25%; margin-left: 6.25%;"
-                 onclick="startTimer()">
-                <span class="glyphicon glyphicon-play" aria-hidden="true"></span> <strong>Play</strong>
-            </button>
-            <button type="button" class="btn btn-info" style="width: 25%; margin-left: 6.25%;"
-                 onclick="stopTimer()">
-                <span class="glyphicon glyphicon-pause" aria-hidden="true"></span> <strong>Pause</strong>
-            </button>
-            <button type="button" class="btn btn-danger" style="width: 25%; margin-left: 6.25%;"
-                 onclick="clearTimer()">
-                <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> <strong>Stop</strong>
-            </button>
-        </div>
+        <!-- <div class="btn-group btn-group-justified" role="group" aria-label="..."  align="center"> -->
+            <div class="col-md-4">
+                <button type="button" class="btn btn-success" id="button-start" style="width: 80%; margin: 5px;"
+                     onclick="startTimer()">
+                    <span class="glyphicon glyphicon-play" aria-hidden="true"></span> <strong>Play</strong>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button type="button" class="btn btn-primary" id="button-stop" style="width: 80%; margin: 5px;"
+                    onclick="stopTimer()">
+                    <span class="glyphicon glyphicon-pause" aria-hidden="true"></span> <strong>Pause</strong>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button type="button" class="btn btn-danger" id="button-reset" style="width: 80%; margin: 5px;"
+                    onclick="clearTimer()">
+                    <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> <strong>Stop</strong>
+                </button>
+            </div>
+        <!-- </div> -->
     </div>
   
 {% endblock %}

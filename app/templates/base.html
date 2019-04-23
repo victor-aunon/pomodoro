@@ -6,13 +6,19 @@
             $(function() {
                 minutesdiv = $('#minutes');
                 secondsdiv = $('#seconds');
-                minutesdiv.text('00');
-                secondsdiv.text(30);
+                startButton = document.getElementById("button-start");
+                stopButton = document.getElementById("button-stop");
+                resetButton = document.getElementById("button-reset");
+                minutesdiv.text('25');
+                secondsdiv.text('00');
+                notifWorkAudio = new Audio("{{ url_for('static', filename='sounds/slow-spring-board.mp3') }}");
+                notifBreakAudio = new Audio("{{ url_for('static', filename='sounds/quite-impressed.mp3') }}");
+                notifLongBreakAudio = new Audio("{{ url_for('static', filename='sounds/solemn.mp3') }}");
                 if (typeof(Storage) !== "undefined") {
                     if (localStorage.timer) {
                         localStorage.timer = Number(localStorage.timer);
                     } else {
-                        localStorage.timer = Number(30);
+                        localStorage.timer = Number(1500);
                     }
                     if (localStorage.pomodoros){
                         localStorage.pomodoros = Number(localStorage.pomodoros);
@@ -29,10 +35,38 @@
                     } else {
                         localStorage.longRests = Number(0);
                     }
+                    if (localStorage.whichNow){
+                        // work or break or longBreak
+                        localStorage.whichNow = localStorage.whichNow ;
+                    } else {
+                        localStorage.whichNow = "work";
+                    }
+                    if (localStorage.lastTime) {
+                        localStorage.lastTime = localStorage.lastTime ;
+                        // check if a pomodoro or break has ended during while the tab was closed
+                        var currentTime = new Date();
+                        if (localStorage.whichNow == "work" && (currentTime.getTime() - localStorage.lastTime.getTime()) > 1500) {
+                            localStorage.pomodoros++;
+                            if (localStorage.pomodoros % 4 == 0) {
+                                localStorage.whichNow = "longBreak";
+                                localStorage.timer = Number(1200);
+                            } else {
+                                localStorage.whichNow = "break";
+                                localStorage.timer = Number(300);
+                            }
+                        } else if (localStorage.whichNow == "break" && (currentTime.getTime() - localStorage.lastTime.getTime()) > 300) {
+                            localStorage.shortRests++;
+                            localStorage.whichNow = "work";
+                            localStorage.timer = Number(1500);
+                        } else if (localStorage.whichNow == "longBreak" && (currentTime.getTime() - localStorage.lastTime.getTime()) > 1200) {
+                            localStorage.longRests++;
+                            localStorage.whichNow = "work";
+                            localStorage.timer = Number(1500);
+                        }
+                    } else {
+                        localStorage.lastTime = new Date();
+                    }
                 }
-                pomodoros = localStorage.pomodoros;
-                shortRests = localStorage.shortRests;
-                longRests = localStorage.longRests;
             });
 
         // Notifications
@@ -45,7 +79,7 @@
                 Notification.requestPermission();
             });
 
-        function notifyMe(title, body) {
+        function notifyMe(title, body, url) {
             if (Notification.permission !== "granted")
                 Notification.requestPermission();
             else {
@@ -53,42 +87,91 @@
                 // icon: icon,
                 body: body,
                 });
-                // notification.onclick = function () {
-                // window.open(url);
-                // };
+                notification.onclick = function () {
+                window.open(url, "_self");
+                };
             }
         }
 
-
         function clearTimer(pomodoroFinished=false, restFinished=false) {
             clearInterval(timerInterval);
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            resetButton.disabled = true;
             if (pomodoroFinished) {
                 localStorage.pomodoros++;
-                localStorage.timer = Number(20);
-                minutesdiv.text('00');
-                secondsdiv.text('20');
-                document.title = 'Take a break!';
-                notifyMe('Take a break!', 'You have completed one pomodoro.')
+                if (localStorage.pomodoros % 4 == 0){
+                    localStorage.timer = Number(1200);
+                    minutesdiv.text('20');
+                    secondsdiv.text('00');
+                    document.title = 'Take a long break!';
+                    notifLongBreakAudio.play();
+                    notifyMe('Take a long break!', 'You have completed one pomodoro.',
+                             "{{ url_for('main.index') }}");
+                    localStorage.whichNow = "longBreak";
+                } else {
+                    localStorage.timer = Number(300);
+                    minutesdiv.text('05');
+                    secondsdiv.text('00');
+                    document.title = 'Take a break!';
+                    notifBreakAudio.play();
+                    notifyMe('Take a break!', 'You have completed one pomodoro.',
+                             "{{ url_for('main.index') }}");
+                    localStorage.whichNow = "break";
+                }
+                
             }
             if (restFinished) {
-                localStorage.shortRests++;
-                localStorage.timer = Number(22);
-                minutesdiv.text('00');
-                secondsdiv.text('22');
+                localStorage.timer = Number(1500);
+                minutesdiv.text('25');
+                secondsdiv.text('00');
                 document.title = "Let's work!";
-                notifyMe("Let's work!", 'You have taken a short break.')
+                notifWorkAudio.play();
+                if (localStorage.whichNow == "break") {
+                    localStorage.shortRests++;
+                    notifyMe("Let's work!", 'You have taken a short break.',
+                             "{{ url_for('main.index') }}");
+                } else if (localStorage.whichNow == "longBreak") {
+                    localStorage.longRests++;
+                    notifyMe("Let's work!", 'You have taken a long break.',
+                             "{{ url_for('main.index') }}");
+                }
+                localStorage.whichNow = "work"
             }
-            // minutesdiv.text('00');
-            // secondsdiv.text(45);
+            // When the reset button is pressed
+            if (!pomodoroFinished && !restFinished) {
+                if (localStorage.whichNow == "work") {
+                    localStorage.timer = Number(1500);
+                    minutesdiv.text('25');
+                    secondsdiv.text('00');
+                    document.title = "25:00 Working";
+                } else if(localStorage.whichNow == "break") {
+                    localStorage.timer = Number(300);
+                    minutesdiv.text('05');
+                    secondsdiv.text('00');
+                    document.title = "05:00 Resting";
+                } else if(localStorage.whichNow == "longBreak") {
+                    localStorage.timer = Number(1200);
+                    minutesdiv.text('20');
+                    secondsdiv.text('00');
+                    document.title = "20:00 Resting";
+                }
+            }
         };
 
         function stopTimer() {
             clearInterval(timerInterval);
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            resetButton.disabled = false;
         }
 
         function startTimer() {
             duration = localStorage.timer - 1;
             var timer = duration, minutes, seconds;
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            resetButton.disabled = false;
             timerInterval = setInterval(function () {
                 minutes = parseInt(timer / 60, 10)
                 seconds = parseInt(timer % 60, 10);
@@ -98,20 +181,21 @@
 
                 minutesdiv.text(minutes);
                 secondsdiv.text(seconds);
-                if (duration < 21) 
-                    document.title = minutes + ':' + seconds + ' Resting';
-                else
+                if (localStorage.whichNow == "work") 
                     document.title = minutes + ':' + seconds + ' Working';
+                else
+                    document.title = minutes + ':' + seconds + ' Resting';
 
                 if (typeof(Storage) !== "undefined") {
                     localStorage.setItem("timer", timer);
+                    localStorage.lastTime = new Date();
                 }
 
                 if (--timer < 0) {
-                    if (duration < 21) {
-                        clearTimer(pomodoroFinished=false, restFinished=true);
-                    } else {
+                    if (localStorage.whichNow == "work") {
                         clearTimer(pomodoroFinished=true, restFinished=false);
+                    } else {
+                        clearTimer(pomodoroFinished=false, restFinished=true);
                     }
                 }
             }, 1000);
