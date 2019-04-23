@@ -3,13 +3,91 @@
 {% block scripts %}
     {{ super() }}
     <script>
+            $(function() {
+                minutesdiv = $('#minutes');
+                secondsdiv = $('#seconds');
+                minutesdiv.text('00');
+                secondsdiv.text(30);
+                if (typeof(Storage) !== "undefined") {
+                    if (localStorage.timer) {
+                        localStorage.timer = Number(localStorage.timer);
+                    } else {
+                        localStorage.timer = Number(30);
+                    }
+                    if (localStorage.pomodoros){
+                        localStorage.pomodoros = Number(localStorage.pomodoros);
+                    } else {
+                        localStorage.pomodoros = Number(0);
+                    }
+                    if (localStorage.shortRests){
+                        localStorage.shortRests = Number(localStorage.shortRests);
+                    } else {
+                        localStorage.shortRests = Number(0);
+                    }
+                    if (localStorage.longRests){
+                        localStorage.longRests = Number(localStorage.longRests);
+                    } else {
+                        localStorage.longRests = Number(0);
+                    }
+                }
+                pomodoros = localStorage.pomodoros;
+                shortRests = localStorage.shortRests;
+                longRests = localStorage.longRests;
+            });
 
-        function clearTimer() {
+        // Notifications
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!Notification) {
+                alert('Desktop notifications not available in your browser. Try Chromium.'); 
+                return;
+            }
+            if (Notification.permission !== "granted")
+                Notification.requestPermission();
+            });
+
+        function notifyMe(title, body) {
+            if (Notification.permission !== "granted")
+                Notification.requestPermission();
+            else {
+                var notification = new Notification(title, {
+                // icon: icon,
+                body: body,
+                });
+                // notification.onclick = function () {
+                // window.open(url);
+                // };
+            }
+        }
+
+
+        function clearTimer(pomodoroFinished=false, restFinished=false) {
             clearInterval(timerInterval);
-            localStorage.timer;
+            if (pomodoroFinished) {
+                localStorage.pomodoros++;
+                localStorage.timer = Number(20);
+                minutesdiv.text('00');
+                secondsdiv.text('20');
+                document.title = 'Take a break!';
+                notifyMe('Take a break!', 'You have completed one pomodoro.')
+            }
+            if (restFinished) {
+                localStorage.shortRests++;
+                localStorage.timer = Number(22);
+                minutesdiv.text('00');
+                secondsdiv.text('22');
+                document.title = "Let's work!";
+                notifyMe("Let's work!", 'You have taken a short break.')
+            }
+            // minutesdiv.text('00');
+            // secondsdiv.text(45);
         };
 
-        function startTimer(duration, minutesdiv, secondsdiv) {
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function startTimer() {
+            duration = localStorage.timer - 1;
             var timer = duration, minutes, seconds;
             timerInterval = setInterval(function () {
                 minutes = parseInt(timer / 60, 10)
@@ -20,33 +98,27 @@
 
                 minutesdiv.text(minutes);
                 secondsdiv.text(seconds);
-                document.title = minutes + ':' + seconds + ' Working';
+                if (duration < 21) 
+                    document.title = minutes + ':' + seconds + ' Resting';
+                else
+                    document.title = minutes + ':' + seconds + ' Working';
 
                 if (typeof(Storage) !== "undefined") {
                     localStorage.setItem("timer", timer);
                 }
 
                 if (--timer < 0) {
-                    // clearInterval(timerInterval);
-                    clearTimer();
+                    if (duration < 21) {
+                        clearTimer(pomodoroFinished=false, restFinished=true);
+                    } else {
+                        clearTimer(pomodoroFinished=true, restFinished=false);
+                    }
                 }
             }, 1000);
         };
 
+
         
-        $(function() {
-            minutes = $('#minutes');
-            seconds = $('#seconds');
-            if (typeof(Storage) !== "undefined") {
-                if (localStorage.timer) {
-                    localStorage.timer = Number(localStorage.timer);
-                } else {
-                    localStorage.timer = Number(15);
-                }
-            }
-            localStorage.timer = Number(45);
-            startTimer(localStorage.timer, minutes, seconds);
-        });
     </script>
 {% endblock %}
 

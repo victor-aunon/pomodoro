@@ -1,5 +1,7 @@
 # Folders
 tomato-env
+cmt-env
+virtual-env
 __pycache__
 .vscode
 

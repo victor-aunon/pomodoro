@@ -3,31 +3,41 @@
 {% block app_content %}
     <h1 align="center" class="description"">Pomodoro timer enhanced, boost your productivity</h1>
     <div class="row" align="center" style="width: 60%;">
-        <div class="col-md-1" style="width:47.5%;">
-            <div class="timer" id="minutes">
+        <table>
+            <tr>
+                <td style="width: 47.5%;">
+                    <div class="timer" id="minutes">
                 
-            </div>
-        </div>
-        <div class="col-md-1" style="width:5%;" >
-            <div class="timer_separator">:
-
-            </div>
-        </div>
-        <div class="col-md-1" style="width:47.5%;">
-            <div class="timer" id="seconds">
-
-            </div>
+                    </div>
+                </td>
+                <td style="width: 5%;">
+                    <div class="timer_separator">:
+                
+                    </div>
+                </td>
+                <td style="width: 47.5%;">
+                    <div class="timer" id="seconds">
+                
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="row" align="center" style="width: 60%; margin: 20px;">
+        <div class="btn-group btn-group-justified" role="group" aria-label="..."  align="center">
+            <button type="button" class="btn btn-success" style="width: 25%; margin-left: 6.25%;"
+                 onclick="startTimer()">
+                <span class="glyphicon glyphicon-play" aria-hidden="true"></span> <strong>Play</strong>
+            </button>
+            <button type="button" class="btn btn-info" style="width: 25%; margin-left: 6.25%;"
+                 onclick="stopTimer()">
+                <span class="glyphicon glyphicon-pause" aria-hidden="true"></span> <strong>Pause</strong>
+            </button>
+            <button type="button" class="btn btn-danger" style="width: 25%; margin-left: 6.25%;"
+                 onclick="clearTimer()">
+                <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> <strong>Stop</strong>
+            </button>
         </div>
     </div>
-    <div class="row" align="center">
-            <table>
-                <tr>
-                    <td style="width: 50%; margin-right: 10px;">
-                    </td>
-                    <td style="width: 50%; margin-left: 10px;">
-                        <button type="button" class="btn btn-danger" onclick="clearTimer()">Stop</button>
-                    </td>
-                </tr>
-            </table>
-    </div>
+  
 {% endblock %}
