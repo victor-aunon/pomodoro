@@ -3,93 +3,184 @@
 {% block scripts %}
     {{ super() }}
     <script>
-            $(function() {
-                minutesdiv = $('#minutes');
-                secondsdiv = $('#seconds');
-                startButton = document.getElementById("button-start");
-                stopButton = document.getElementById("button-stop");
-                resetButton = document.getElementById("button-reset");
-                minutesdiv.text('25');
-                secondsdiv.text('00');
-                notifWorkAudio = new Audio("{{ url_for('static', filename='sounds/slow-spring-board.mp3') }}");
-                notifBreakAudio = new Audio("{{ url_for('static', filename='sounds/quite-impressed.mp3') }}");
-                notifLongBreakAudio = new Audio("{{ url_for('static', filename='sounds/solemn.mp3') }}");
-                if (typeof(Storage) !== "undefined") {
-                    if (localStorage.timer) {
-                        localStorage.timer = Number(localStorage.timer);
-                    } else {
-                        localStorage.timer = Number(1500);
+        $(function() {
+            minutesdiv = $('#minutes');
+            secondsdiv = $('#seconds');
+            startButton = document.getElementById("button-start");
+            stopButton = document.getElementById("button-stop");
+            resetButton = document.getElementById("button-reset");
+            pomodoroTime = 1500; // 1500 25min
+            pomodoroTimeText = '25';
+            breakTime = 300; // 300 5min
+            breakTimeText = '05';
+            longBreakTime = 1200; // 1200 20min
+            longBreakTimeText = '20';
+            secondsdiv.text('00');
+            notifWorkAudio = new Audio("{{ url_for('static', filename='sounds/slow-spring-board.mp3') }}");
+            notifBreakAudio = new Audio("{{ url_for('static', filename='sounds/quite-impressed.mp3') }}");
+            notifLongBreakAudio = new Audio("{{ url_for('static', filename='sounds/solemn.mp3') }}");
+            var currentTime = new Date();
+            if (typeof(Storage) !== "undefined") {
+                if (localStorage.timer) {
+                    localStorage.timer = Number(localStorage.timer);
+                    setTimerText();
+                } else {
+                    localStorage.timer = Number(pomodoroTime);
+                    setTimerText();
+                }
+                if (localStorage.pomodoros){
+                    localStorage.pomodoros = Number(localStorage.pomodoros);
+                } else {
+                    localStorage.pomodoros = Number(0);
+                }
+                if (localStorage.shortRests){
+                    localStorage.shortRests = Number(localStorage.shortRests);
+                } else {
+                    localStorage.shortRests = Number(0);
+                }
+                if (localStorage.longRests){
+                    localStorage.longRests = Number(localStorage.longRests);
+                } else {
+                    localStorage.longRests = Number(0);
+                }
+                if (localStorage.timerRunning){
+                    // 0 or 1
+                    localStorage.timerRunning = localStorage.timerRunning;
+                    if (localStorage.timerRunning == "1")
+                        startTimer();
+                } else {
+                    localStorage.timerRunning = Number(0);
+                }
+                if (localStorage.whichNow){
+                    // work or break or longBreak
+                    localStorage.whichNow = localStorage.whichNow ;
+                } else {
+                    localStorage.whichNow = "work";
+                }
+                if (localStorage.tasks) { 
+                    localStorage.tasks = localStorage.tasks;
+                    tasksToCreate = [];
+                    for (i = 1; i <= Number(localStorage.tasks); i++) {
+                        taskBody = JSON.parse(localStorage["task-" + i.toString()])["text"];
+                        taskState = JSON.parse(localStorage["task-" + i.toString()])["complete"];
+                        lastTime = new Date(Date.parse(localStorage.lastTime));
+                        if (currentTime.getDate() == lastTime.getDate()) {
+                            addTask(taskBody, "task-" + i.toString());
+                            if (taskState == "true") {
+                                completeTask("task-" + i);
+                            }
+                        } else {
+                            // Remove the task, it is going to be created now if it is uncomplete
+                            localStorage.removeItem("task-" + i.toString());
+                            if (taskState == "false"){
+                                tasksToCreate.push(taskBody);
+                            }
+                        }
                     }
-                    if (localStorage.pomodoros){
-                        localStorage.pomodoros = Number(localStorage.pomodoros);
-                    } else {
-                        localStorage.pomodoros = Number(0);
+                    if (tasksToCreate.length > 0){
+                        localStorage.tasks = Number(0);
+                        for (i = 0; i < tasksToCreate.length; i++){
+                            addTask(tasksToCreate[i]);
+                        }
                     }
-                    if (localStorage.shortRests){
-                        localStorage.shortRests = Number(localStorage.shortRests);
-                    } else {
-                        localStorage.shortRests = Number(0);
-                    }
-                    if (localStorage.longRests){
-                        localStorage.longRests = Number(localStorage.longRests);
-                    } else {
-                        localStorage.longRests = Number(0);
-                    }
-                    if (localStorage.whichNow){
-                        // work or break or longBreak
-                        localStorage.whichNow = localStorage.whichNow ;
-                    } else {
-                        localStorage.whichNow = "work";
-                    }
-                    if (localStorage.lastTime) {
-                        localStorage.lastTime = localStorage.lastTime ;
-                        // check if a pomodoro or break has ended during while the tab was closed
-                        var currentTime = new Date();
-                        if (localStorage.whichNow == "work" && (currentTime.getTime() - localStorage.lastTime.getTime()) > 1500) {
+                } else {
+                    localStorage.tasks = Number(0);
+                }
+                if (localStorage.lastTime) {
+                    localStorage.lastTime = localStorage.lastTime ;
+                    // check if a pomodoro or break has ended during while the tab was closed
+                    // check if has passed a day
+                    lastTime = new Date(Date.parse(localStorage.lastTime));
+                    if (currentTime.getDate() == lastTime.getDate()) {
+                        if (localStorage.whichNow == "work" && localStorage.timerRunning == "1" && 
+                            (currentTime.getTime() - lastTime.getTime())/1000 > pomodoroTime) {
+                            console.log("yes");
+                            console.log((currentTime.getTime() - lastTime.getTime())/1000);
                             localStorage.pomodoros++;
                             if (localStorage.pomodoros % 4 == 0) {
                                 localStorage.whichNow = "longBreak";
-                                localStorage.timer = Number(1200);
+                                localStorage.timer = Number(longBreakTime);
                             } else {
                                 localStorage.whichNow = "break";
-                                localStorage.timer = Number(300);
+                                localStorage.timer = Number(breakTime);
                             }
-                        } else if (localStorage.whichNow == "break" && (currentTime.getTime() - localStorage.lastTime.getTime()) > 300) {
+                        } else if (localStorage.whichNow == "break" && localStorage.timerRunning == 1 && 
+                            (currentTime.getTime() - lastTime.getTime())/1000 > breakTime) {
                             localStorage.shortRests++;
                             localStorage.whichNow = "work";
-                            localStorage.timer = Number(1500);
-                        } else if (localStorage.whichNow == "longBreak" && (currentTime.getTime() - localStorage.lastTime.getTime()) > 1200) {
+                            localStorage.timer = Number(pomodoroTime);
+                        } else if (localStorage.whichNow == "longBreak" && localStorage.timerRunning == 1 && 
+                            (currentTime.getTime() - lastTime.getTime())/1000 > longBreakTime) {
                             localStorage.longRests++;
                             localStorage.whichNow = "work";
-                            localStorage.timer = Number(1500);
+                            localStorage.timer = Number(pomodoroTime);
                         }
+                        setTimerText();
                     } else {
-                        localStorage.lastTime = new Date();
+                        clearStorage();
                     }
+                } else {
+                    localStorage.lastTime = new Date();
                 }
-            });
+            }
+        });
+
+        function clearStorage() {
+            localStorage.timer = Number(pomodoroTime);
+            setTimerText();
+            localStorage.lastTime = new Date();
+            localStorage.pomodoros = Number(0);
+            localStorage.shortRests = Number(0);
+            localStorage.longRests = Number(0);
+            localStorage.whichNow = "work";
+        }
+
+        function setTimerText() {
+            min = parseInt(Number(localStorage.timer) / 60, 10)
+            sec = parseInt(Number(localStorage.timer) % 60, 10);
+            minutesdiv.text(min < 10 ? "0" + min : min);
+            secondsdiv.text(sec < 10 ? "0" + sec : sec);
+        }
 
         // Notifications
         document.addEventListener('DOMContentLoaded', function () {
             if (!Notification) {
-                alert('Desktop notifications not available in your browser. Try Chromium.'); 
+                alert('Desktop notifications not available in your browser. Try Firefox.'); 
                 return;
             }
             if (Notification.permission !== "granted")
                 Notification.requestPermission();
             });
 
-        function notifyMe(title, body, url) {
+        function notifyMe(title, body, icon, url) {
             if (Notification.permission !== "granted")
                 Notification.requestPermission();
             else {
                 var notification = new Notification(title, {
-                // icon: icon,
+                icon: icon,
                 body: body,
                 });
                 notification.onclick = function () {
                 window.open(url, "_self");
                 };
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keyup', onKeyUp, false);
+        function onKeyUp(key) {
+            var key = key || window.event;
+            if (key.altKey && key.which == 80) { // p key
+                if (startButton.disabled == false)
+                    startTimer();
+                else if (stopButton.disabled == false)
+                    stopTimer();
+                return false;
+            }
+            if (key.altKey && key.which == 82) { // r key
+                if (resetButton.disabled == false)
+                    clearTimer();
+                return false;
             }
         }
 
@@ -101,39 +192,43 @@
             if (pomodoroFinished) {
                 localStorage.pomodoros++;
                 if (localStorage.pomodoros % 4 == 0){
-                    localStorage.timer = Number(1200);
-                    minutesdiv.text('20');
+                    localStorage.timer = Number(longBreakTime);
+                    minutesdiv.text(longBreakTimeText);
                     secondsdiv.text('00');
                     document.title = 'Take a long break!';
                     notifLongBreakAudio.play();
-                    notifyMe('Take a long break!', 'You have completed one pomodoro.',
+                    notifyMe('Take a long break!', 'You have completed ' + localStorage.pomodoros + ' pomodoro(s).',
+                             "{{ url_for('static', filename='images/rest.png') }}",
                              "{{ url_for('main.index') }}");
                     localStorage.whichNow = "longBreak";
                 } else {
-                    localStorage.timer = Number(300);
-                    minutesdiv.text('05');
+                    localStorage.timer = Number(breakTime);
+                    minutesdiv.text(breakTimeText);
                     secondsdiv.text('00');
                     document.title = 'Take a break!';
                     notifBreakAudio.play();
                     notifyMe('Take a break!', 'You have completed one pomodoro.',
+                             "{{ url_for('static', filename='images/rest.png') }}",
                              "{{ url_for('main.index') }}");
                     localStorage.whichNow = "break";
                 }
                 
             }
             if (restFinished) {
-                localStorage.timer = Number(1500);
-                minutesdiv.text('25');
+                localStorage.timer = Number(pomodoroTime);
+                minutesdiv.text(pomodoroTimeText);
                 secondsdiv.text('00');
                 document.title = "Let's work!";
                 notifWorkAudio.play();
                 if (localStorage.whichNow == "break") {
                     localStorage.shortRests++;
                     notifyMe("Let's work!", 'You have taken a short break.',
+                             "{{ url_for('static', filename='images/work.png') }}",
                              "{{ url_for('main.index') }}");
                 } else if (localStorage.whichNow == "longBreak") {
                     localStorage.longRests++;
                     notifyMe("Let's work!", 'You have taken a long break.',
+                             "{{ url_for('static', filename='images/work.png') }}",
                              "{{ url_for('main.index') }}");
                 }
                 localStorage.whichNow = "work"
@@ -141,22 +236,19 @@
             // When the reset button is pressed
             if (!pomodoroFinished && !restFinished) {
                 if (localStorage.whichNow == "work") {
-                    localStorage.timer = Number(1500);
-                    minutesdiv.text('25');
-                    secondsdiv.text('00');
-                    document.title = "25:00 Working";
+                    localStorage.timer = Number(pomodoroTime);
+                    document.title = pomodoroTimeText + ":00 Working";
                 } else if(localStorage.whichNow == "break") {
-                    localStorage.timer = Number(300);
-                    minutesdiv.text('05');
-                    secondsdiv.text('00');
-                    document.title = "05:00 Resting";
+                    localStorage.timer = Number(breakTime);
+                    document.title = breakTimeText + ":00 Resting";
                 } else if(localStorage.whichNow == "longBreak") {
-                    localStorage.timer = Number(1200);
-                    minutesdiv.text('20');
-                    secondsdiv.text('00');
-                    document.title = "20:00 Resting";
+                    localStorage.timer = Number(longBreakTime);
+                    document.title = longBreakTimeText + ":00 Resting";
                 }
+                setTimerText();
             }
+            localStorage.lastTime = new Date();
+            localStorage.timerRunning = Number(0);
         };
 
         function stopTimer() {
@@ -164,6 +256,8 @@
             startButton.disabled = false;
             stopButton.disabled = true;
             resetButton.disabled = false;
+            localStorage.lastTime = new Date();
+            localStorage.timerRunning = Number(0);
         }
 
         function startTimer() {
@@ -189,6 +283,7 @@
                 if (typeof(Storage) !== "undefined") {
                     localStorage.setItem("timer", timer);
                     localStorage.lastTime = new Date();
+                    localStorage.timerRunning = Number(1);
                 }
 
                 if (--timer < 0) {
@@ -201,6 +296,74 @@
             }, 1000);
         };
 
+        function addTask (taskBody, taskID) {
+            if (taskID !== undefined){
+                labelID = "label-" + taskID;
+                buttonID = "button-" + taskID;
+                currentID = taskID;
+            } else {
+                labelID = "label-task-" + (Number(localStorage.tasks) + 1);
+                buttonID = "button-task-" + (Number(localStorage.tasks) + 1);
+                currentID = "task-" + (Number(localStorage.tasks) + 1).toString();
+            }
+            // Fetch tasks-container object
+            var tasksContainer = document.getElementById("tasks-container");
+            // Create task element (text + button)
+            var divTask = document.createElement("div");
+            divTask.setAttribute("class", "row");
+            divTask.setAttribute("style", "text-align: start;");
+            //      Create text element
+            var labelTask = document.createElement("div");
+            labelTask.setAttribute("id", labelID);
+            labelTask.setAttribute("class", "col-xs-8 div-task label-task");
+            // labelTask.setAttribute("style", "background: white; opacity: 0.8; border-top-left-radius: 5px; \
+            //         border-bottom-left-radius: 5px; height: fit-content; min-height: 30px; \
+            //         border-top: 0.5px outset blue;")  
+            labelTask.innerHTML = taskBody;
+            //      Create done button element
+            var buttonDiv = document.createElement("div");
+            buttonDiv.setAttribute("class", "col-xs-1");
+            buttonDiv.setAttribute("align", "right");
+            buttonDiv.setAttribute("style", "margin-left: -15px;");
+            var buttonDone = document.createElement("button");
+            buttonDone.setAttribute("id", buttonID);
+            buttonDone.setAttribute("class", "btn btn-success btn-task");
+            buttonDone.setAttribute("type", "button");
+            buttonDone.setAttribute("onclick", "completeTask(this.id.split('button-')[1])");
+            // buttonDone.setAttribute("style", "border-top-left-radius: 0px; border-bottom-left-radius: 0px; \
+            //         vertical-align: middle; height: 30px;");
+            var gliph = document.createElement("span");
+            gliph.setAttribute("class", "glyphicon glyphicon-ok");
+            gliph.setAttribute("aria-hidden", "true");
+            buttonDone.appendChild(gliph);
+            buttonDiv.appendChild(buttonDone);
+            //      Attach text and button elements to task element
+            divTask.appendChild(labelTask);
+            divTask.appendChild(buttonDiv);
+            // Attach task element to tasks-container and modify its height
+            tasksContainer.appendChild(divTask);
+            tasksContainer.setAttribute("style", "bottom: " + (1).toString() + "%;");
+
+            // Remove text from "Add a task" input
+            document.getElementById('task-form').value = ''
+
+            // Store the current task
+            localStorage.setItem(currentID, JSON.stringify({"text": taskBody, "complete": "false"}));
+            if (taskID == undefined){
+                localStorage.tasks++;
+            }
+            localStorage.lastTime = new Date();
+        }
+
+        function completeTask(taskID) {
+            document.getElementById("label-" + taskID).setAttribute("class",
+                                             "col-xs-8 div-task label-task completed");
+            document.getElementById("button-" + taskID).setAttribute("class",
+                                            "btn btn-warning btn-task");
+            taskText = JSON.parse(localStorage[taskID])["text"];
+            localStorage.setItem(taskID, JSON.stringify({"text": taskText, "complete": "true"}));
+            localStorage.lastTime = new Date();
+        }
 
         
     </script>
@@ -217,7 +380,7 @@
 {% endblock %}
 
 {% block navbar %}
-<nav class="navbar navbar-inverse">
+<nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container-fluid">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -238,7 +401,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container-fluid" align="center" style="height: 100vh;">
+    <div class="container-fluid" align="center" style="height: 89vh;">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
