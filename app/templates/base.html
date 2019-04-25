@@ -207,7 +207,7 @@
                     secondsdiv.text('00');
                     document.title = 'Take a break!';
                     notifBreakAudio.play();
-                    notifyMe('Take a break!', 'You have completed one pomodoro.',
+                    notifyMe('Take a break!', 'You have completed ' + localStorage.pomodoros + ' pomodoro(s).',
                              "{{ url_for('static', filename='images/rest.png') }}",
                              "{{ url_for('main.index') }}");
                     localStorage.whichNow = "break";
