@@ -1,7 +1,7 @@
 import os
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
-from flask import Flask, current_app
+from flask import Flask, current_app, request
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
@@ -78,3 +78,8 @@ def create_app(config_class=Config):
         app.logger.info('Pomodoro startup')
 
     return app
+
+
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(current_app.config['LANGUAGES'])

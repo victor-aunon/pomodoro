@@ -1,1 +1,1 @@
-web: gunicorn tomato:app
+web: flask translate compile; gunicorn tomato:app

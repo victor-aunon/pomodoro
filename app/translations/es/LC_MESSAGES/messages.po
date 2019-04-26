@@ -1,0 +1,144 @@
+# Spanish translations for PROJECT.
+# Copyright (C) 2019 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2019-04-26 13:12+0200\n"
+"PO-Revision-Date: 2019-04-26 12:40+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: es\n"
+"Language-Team: es <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+
+#: app/__init__.py:20
+msgid "Please log in to access this page."
+msgstr "Por favor identifícate para acceder a esta página."
+
+#: app/templates/base.html:150
+msgid "Desktop notifications not available in your browser. Try Firefox."
+msgstr "Las notificaciones de escritorio no están disponibles en este navegador, prueba con Firefox."
+
+#: app/templates/base.html:200 app/templates/base.html:203
+msgid "Take a long break!"
+msgstr "¡Tómate un descanso largo!"
+
+#: app/templates/base.html:204 app/templates/base.html:215
+msgid "You have completed "
+msgstr "Has completado "
+
+#: app/templates/base.html:212 app/templates/base.html:214
+msgid "Take a break!"
+msgstr "¡Tómate un descanso!"
+
+#: app/templates/base.html:226 app/templates/base.html:230
+#: app/templates/base.html:235
+msgid "Let's work!"
+msgstr "¡A trabajar!"
+
+#: app/templates/base.html:230
+msgid "You have taken a short break."
+msgstr "Te has tomado un descanso breve."
+
+#: app/templates/base.html:235
+msgid "You have taken a long break."
+msgstr "Te has tomado un descanso largo."
+
+#: app/templates/base.html:245 app/templates/base.html:284
+msgid "Working"
+msgstr "Trabajando"
+
+#: app/templates/base.html:248 app/templates/base.html:251
+#: app/templates/base.html:286
+msgid "Resting"
+msgstr "Descansando"
+
+#: app/templates/base.html:384
+msgid "Pomodoro timer"
+msgstr "Pomodoro timer"
+
+#: app/templates/base.html:401
+msgid "Home"
+msgstr "Inicio"
+
+#: app/templates/index.html:4
+msgid "Pomodoro timer enhanced, boost your productivity"
+msgstr "Pomodoro timer, incrementa tu productividad "
+
+#: app/templates/index.html:31
+msgid "Play"
+msgstr "Iniciar"
+
+#: app/templates/index.html:37
+msgid "Pause"
+msgstr "Pausar"
+
+#: app/templates/index.html:43
+msgid "Stop"
+msgstr "Reiniciar"
+
+#: app/templates/index.html:58
+msgid "Add a task"
+msgstr "Añade una tarea"
+
+#: app/templates/index.html:73
+msgid "Keyboard shortcuts"
+msgstr "Atajos de teclado"
+
+#: app/templates/index.html:74
+msgid "play / pause the timer"
+msgstr "inicia / pausa el contador"
+
+#: app/templates/index.html:75
+msgid "stop the timer"
+msgstr "reinicia el contador"
+
+#: app/templates/index.html:76
+msgid "Tips"
+msgstr "Consejos"
+
+#: app/templates/index.html:77
+msgid "Enable desktop notifications"
+msgstr "Activa las notificaciones de escritorio"
+
+#: app/templates/index.html:77
+msgid "to get notified when the countdown ends"
+msgstr "para ser avisado cuando el contador termine"
+
+#: app/templates/index.html:78
+msgid "Allow cookies"
+msgstr "Permite las cookies"
+
+#: app/templates/index.html:78
+msgid "on this site to keep your data and tasks"
+msgstr "en este sitio para guardar tu registro y tus tareas"
+
+#: app/templates/errors/404.html:4
+msgid "File Not Found"
+msgstr "No se ha encontrado lo que buscabas ‍:("
+
+#: app/templates/errors/404.html:6 app/templates/errors/500.html:6
+msgid "Back"
+msgstr "Atrás"
+
+#: app/templates/errors/500.html:4
+msgid "An unexpected error has occurred"
+msgstr "Ocurrió un error inesperado :S"
+
+#: app/templates/errors/500.html:5
+msgid "The administrator has been notified. Sorry for the inconvenience!"
+msgstr "El administrador ha sido notificado. Perdón por las molestias."
+
+#~ msgid "Pomodoro timer"
+#~ msgstr "Pomodoro timer"
+
+#~ msgid "Home"
+#~ msgstr "Inicio"
+

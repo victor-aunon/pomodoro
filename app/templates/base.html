@@ -2,6 +2,8 @@
 
 {% block scripts %}
     {{ super() }}
+    {{ moment.include_moment() }}
+    {{ moment.lang(g.locale) }}
     <script>
         $(function() {
             minutesdiv = $('#minutes');
@@ -145,7 +147,7 @@
         // Notifications
         document.addEventListener('DOMContentLoaded', function () {
             if (!Notification) {
-                alert('Desktop notifications not available in your browser. Try Firefox.'); 
+                alert("{{ _('Desktop notifications not available in your browser. Try Firefox.') }}"); 
                 return;
             }
             if (Notification.permission !== "granted")
@@ -195,9 +197,11 @@
                     localStorage.timer = Number(longBreakTime);
                     minutesdiv.text(longBreakTimeText);
                     secondsdiv.text('00');
-                    document.title = 'Take a long break!';
+                    document.title = "{{ _('Take a long break!') }}";
                     notifLongBreakAudio.play();
-                    notifyMe('Take a long break!', 'You have completed ' + localStorage.pomodoros + ' pomodoro(s).',
+                    
+                    notifyMe("{{ _('Take a long break!') }}",
+                             "{{ _('You have completed ') }}" + localStorage.pomodoros + " pomodoro(s)",
                              "{{ url_for('static', filename='images/rest.png') }}",
                              "{{ url_for('main.index') }}");
                     localStorage.whichNow = "longBreak";
@@ -205,9 +209,10 @@
                     localStorage.timer = Number(breakTime);
                     minutesdiv.text(breakTimeText);
                     secondsdiv.text('00');
-                    document.title = 'Take a break!';
+                    document.title = "{{ _('Take a break!') }}";
                     notifBreakAudio.play();
-                    notifyMe('Take a break!', 'You have completed ' + localStorage.pomodoros + ' pomodoro(s).',
+                    notifyMe("{{ _('Take a break!') }}",
+                             "{{ _('You have completed ') }}" + localStorage.pomodoros + " pomodoro(s)",
                              "{{ url_for('static', filename='images/rest.png') }}",
                              "{{ url_for('main.index') }}");
                     localStorage.whichNow = "break";
@@ -218,16 +223,16 @@
                 localStorage.timer = Number(pomodoroTime);
                 minutesdiv.text(pomodoroTimeText);
                 secondsdiv.text('00');
-                document.title = "Let's work!";
+                document.title = "{{ _("Let's work!") }}";
                 notifWorkAudio.play();
                 if (localStorage.whichNow == "break") {
                     localStorage.shortRests++;
-                    notifyMe("Let's work!", 'You have taken a short break.',
+                    notifyMe("{{ _("Let's work!") }}", "{{ _('You have taken a short break.') }}",
                              "{{ url_for('static', filename='images/work.png') }}",
                              "{{ url_for('main.index') }}");
                 } else if (localStorage.whichNow == "longBreak") {
                     localStorage.longRests++;
-                    notifyMe("Let's work!", 'You have taken a long break.',
+                    notifyMe("{{ _("Let's work!") }}", "{{ _('You have taken a long break.') }}",
                              "{{ url_for('static', filename='images/work.png') }}",
                              "{{ url_for('main.index') }}");
                 }
@@ -237,13 +242,13 @@
             if (!pomodoroFinished && !restFinished) {
                 if (localStorage.whichNow == "work") {
                     localStorage.timer = Number(pomodoroTime);
-                    document.title = pomodoroTimeText + ":00 Working";
+                    document.title = pomodoroTimeText + ":00 " + "{{ _('Working') }}";
                 } else if(localStorage.whichNow == "break") {
                     localStorage.timer = Number(breakTime);
-                    document.title = breakTimeText + ":00 Resting";
+                    document.title = breakTimeText + ":00 " + "{{ _('Resting') }}";
                 } else if(localStorage.whichNow == "longBreak") {
                     localStorage.timer = Number(longBreakTime);
-                    document.title = longBreakTimeText + ":00 Resting";
+                    document.title = longBreakTimeText + ":00 " + "{{ _('Resting') }}";
                 }
                 setTimerText();
             }
@@ -276,9 +281,9 @@
                 minutesdiv.text(minutes);
                 secondsdiv.text(seconds);
                 if (localStorage.whichNow == "work") 
-                    document.title = minutes + ':' + seconds + ' Working';
+                    document.title = minutes + ':' + seconds + " {{ _('Working') }}";
                 else
-                    document.title = minutes + ':' + seconds + ' Resting';
+                    document.title = minutes + ':' + seconds + " {{ _('Resting') }}";
 
                 if (typeof(Storage) !== "undefined") {
                     localStorage.setItem("timer", timer);
@@ -372,7 +377,7 @@
 {% block styles %}
     {{ super() }}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link href="https://fonts.googleapis.com/css?family=Raleway|Ubuntu" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css?family=Raleway|Ubuntu|Noto+Serif" rel="stylesheet"> 
 {% endblock %}
 
 {% block title %}
