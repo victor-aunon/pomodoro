@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        {% if skip_question %}
+            $('#question').css({"display": "none"});
+            {% if creator == true %}
+                $('#registrationCreator').css({"display": "block"});
+            {% else %}
+                $('#registration').css({"display": "block"});
+            {% endif %}
+        {% endif %}
+
+        $('#createTeamYes').click(function() {
+            $('#question').animate({
+            opacity: 0, // animate slideUp
+            marginLeft: '-200px'
+            }, 'slow', 'linear', function() {
+            $(this).remove();
+            });
+            $('#registrationCreator').animate({
+            opacity: 0, // animate slideUp
+            }, 'slow', 'linear', function() {
+                $('#registrationCreator').css({"display": "block", "opacity": "100"});
+            });
+        });
+        $('#createTeamNo').click(function() {
+            $('#question').animate({
+            opacity: 0, // animate slideUp
+            marginLeft: '-200px'
+            }, 'slow', 'linear', function() {
+            $(this).remove();
+            });
+            $('#registration').animate({
+            opacity: 0, // animate slideUp
+            }, 'slow', 'linear', function() {
+                $('#registration').css({"display": "block", "opacity": "100"});
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block app_content  %}
+<div class="row panel" id="question" align="center">
+    <h1>{{ _('Do you want to create a team now?') }}</h1>
+    <h4>{{ _('If not, you will be able to create a team later') }}</h4>
+    <div class="row" align="center">
+        <button type="button" class="btn btn-success" id="createTeamYes" style="width: 40%; margin: 10px;">
+            {{ _('Create team now') }}
+        </button>
+    </div>
+    <div class="row" align="center">
+        <button type="button" class="btn btn-danger" id="createTeamNo" style="width: 40%; margin: 10px;">
+            {{ _('Skip') }}
+        </button>
+    </div>
+</div>
+
+<div class="row panel" id="registration" align="center" style="display: none">
+    <h1>{{ _('Register') }}</h1>
+    <div class="row">
+        <div class="row" align="center" style="width: 60%; margin: 20px;">
+            {{ wtf.quick_form(form, button_map={'submit': 'primary'}) }}
+        </div>
+    </div>
+</div>
+
+<div class="row panel" id="registrationCreator" align="center" style="display: none">
+    <h1>{{ _('Register') }}</h1>
+    <div class="row">
+        <div class="row" align="center" style="width: 60%; margin: 20px;">
+            {{ wtf.quick_form(form_creator, button_map={'submit': 'primary'}) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

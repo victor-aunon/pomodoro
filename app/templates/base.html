@@ -396,10 +396,31 @@
             </button>
             <a class="navbar-brand" href="{{ url_for('main.index') }}">Pomodoro Timer</a>
         </div>
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" >
+            <ul class="nav navbar-nav" style="vertical-align: middle">
                 <li><a href="{{ url_for('main.index') }}">{{ _('Home') }}</a></li>
             </ul>
+            <ul class="nav navbar-nav navbar-right" style="vertical-align: middle">
+                {% if current_user.is_anonymous %}
+                    <li>
+                        <a href="{{ url_for('auth.login') }}">
+                            {{ _('Login') }}
+                        </a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="">
+                            <img style="border-radius:40px; margin: -10px; margin-right: 0px;" border="0" 
+                                src="{{ current_user.avatar(40) }}" />
+                            {{ _('Profile') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('auth.logout') }}">
+                            {{ _('Logout') }}
+                        </a>
+                    </li>
+                {% endif %}
         </div>
     </div>
 </nav>

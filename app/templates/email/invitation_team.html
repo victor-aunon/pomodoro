@@ -1,0 +1,12 @@
+<p>{{ _('Hi! You have been invited to join %(teamname)s team', teamname=team.teamname) }},</p>
+<p>
+    {{ _('To join the team') }}
+    <a href="{{ url_for('auth.join_team', token=token, _external=True) }}">
+        {{ _('click here') }}
+    </a>.
+</p>
+<p>{{ _("Alternatively, you can paste the following link in your browser's address bar:") }}</p>
+<p>{{ url_for('auth.join_team', token=token, _external=True) }}</p>
+<p>{{ _('If you don't know about this team simply ignore this message.') }}</p>
+<p>{{ _('Sincerely,') }}</p>
+<p>{{ _('Pomodoro Timer') }}</p>

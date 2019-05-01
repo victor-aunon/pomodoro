@@ -97,6 +97,13 @@ div.div-task.label-task.completed {
     text-decoration: line-through;
 }
 
+.panel {
+    width: 70%;
+    margin: 20px;
+    background-color: white;
+    opacity: 0.9;
+}
+
 .div-quote {
     background: white;
     opacity: 0.8;

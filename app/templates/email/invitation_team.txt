@@ -1,0 +1,11 @@
+{{ _('Hi! You have been invited to join %(teamname)s team', teamname=team.teamname) }},
+
+{{ _('To join the team:') }}
+
+{{ url_for('auth.join_team', token=token, _external=True) }}
+
+{{ _('If you don't know about this team simply ignore this message.') }}
+
+{{ _('Sincerely') }},
+
+{{ _('Pomodoro Timer') }}
