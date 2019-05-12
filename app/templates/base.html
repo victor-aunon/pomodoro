@@ -11,12 +11,21 @@
             startButton = document.getElementById("button-start");
             stopButton = document.getElementById("button-stop");
             resetButton = document.getElementById("button-reset");
-            pomodoroTime = 1500; // 1500 25min
-            pomodoroTimeText = '25';
-            breakTime = 300; // 300 5min
-            breakTimeText = '05';
-            longBreakTime = 1200; // 1200 20min
-            longBreakTimeText = '20';
+            {% if current_user.is_authenticated %}
+                pomodoroTime = {{current_user.pomodoro_time}} * 60;
+                pomodoroTimeText = (pomodoroTime / 60).toString();
+                breakTime = {{current_user.short_break_time}} * 60;
+                breakTimeText = (breakTime / 60) < 10 ? "0" + (breakTime / 60) : (breakTime / 60);
+                longBreakTime = {{current_user.long_break_time}} * 60;
+                longBreakTimeText = (longBreakTime / 60) < 10 ? "0" + (longBreakTime / 60) : (longBreakTime / 60);
+            {% else %}
+                pomodoroTime = 1500; // 1500 25min
+                pomodoroTimeText = '25';
+                breakTime = 300; // 300 5min
+                breakTimeText = '05';
+                longBreakTime = 1200; // 1200 20min
+                longBreakTimeText = '20';
+            {% endif %}
             secondsdiv.text('00');
             notifWorkAudio = new Audio("{{ url_for('static', filename='sounds/slow-spring-board.mp3') }}");
             notifBreakAudio = new Audio("{{ url_for('static', filename='sounds/quite-impressed.mp3') }}");
@@ -358,6 +367,10 @@
                 localStorage.tasks++;
             }
             localStorage.lastTime = new Date();
+            // Store the current task in the database if user has login
+            {% if current_user.is_authenticated %}
+                $.post('/add-task', {body:taskBody});
+            {% endif %}
         }
 
         function completeTask(taskID) {

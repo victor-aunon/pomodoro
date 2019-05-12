@@ -1,14 +1,23 @@
 from flask_wtf import FlaskForm
 from flask import request
-from wtforms import StringField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, ValidationError, Length
+from wtforms import Form
+from wtforms.fields.html5 import IntegerRangeField
+from wtforms import StringField, SubmitField, TextAreaField, BooleanField
+from wtforms.validators import DataRequired, ValidationError, Length, NumberRange
 from app.models import User
 from flask_babel import _, lazy_gettext as _l
 
 
-class EditProfileForm(FlaskForm):
+class EditProfileForm(FlaskForm, Form):
     username = StringField(_l('Username'), validators=[DataRequired()])
     about_me = TextAreaField(_l('About me'), validators=[Length(min=0, max=300)])
+    pomodoro = IntegerRangeField(_l('Pomodoro duration'),
+                        validators=[NumberRange(min=20, max=30)])
+    short_break = IntegerRangeField(_l('Short break duration'),
+                        validators=[NumberRange(min=5, max=10)])
+    long_break = IntegerRangeField(_l('Long break duration'),
+                        validators=[NumberRange(min=15, max=30)])
+    privacy = BooleanField(_l('Show my online state'), default="checked")
     submit = SubmitField(_l('Submit'))
 
     def __init__(self, original_username, *args, **kwargs):

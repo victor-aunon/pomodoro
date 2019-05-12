@@ -96,7 +96,7 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
             return team_posts.order_by(Post.timestamp.desc())
         else:
             return None
-
+        
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode({'reset_password': self.id, 'exp': time() + expires_in},
                           current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
@@ -311,7 +311,7 @@ class Task(SearchableMixin, db.Model):
     __searchable__ = ['body']
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    timestamp = db.Column(db.Float, index=True, default=time)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     body = db.Column(db.String(500))
     state = db.Column(db.Boolean, index=True, default=True)
 
@@ -319,7 +319,7 @@ class Task(SearchableMixin, db.Model):
 class Pomodoros(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    timestamp = db.Column(db.Float, index=True, default=time)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     amount = db.Column(db.Integer, index=True, default=0)
 
 
