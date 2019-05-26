@@ -68,35 +68,50 @@
                 } else {
                     localStorage.whichNow = "work";
                 }
-                if (localStorage.tasks) { 
-                    localStorage.tasks = localStorage.tasks;
-                    tasksToCreate = [];
-                    for (i = 1; i <= Number(localStorage.tasks); i++) {
-                        taskBody = JSON.parse(localStorage["task-" + i.toString()])["text"];
-                        taskState = JSON.parse(localStorage["task-" + i.toString()])["complete"];
-                        lastTime = new Date(Date.parse(localStorage.lastTime));
-                        if (currentTime.getDate() == lastTime.getDate()) {
-                            addTask(taskBody, "task-" + i.toString());
-                            if (taskState == "true") {
-                                completeTask("task-" + i);
-                            }
-                        } else {
-                            // Remove the task, it is going to be created now if it is uncomplete
-                            localStorage.removeItem("task-" + i.toString());
-                            if (taskState == "false"){
-                                tasksToCreate.push(taskBody);
-                            }
-                        }
-                    }
-                    if (tasksToCreate.length > 0){
-                        localStorage.tasks = Number(0);
-                        for (i = 0; i < tasksToCreate.length; i++){
-                            addTask(tasksToCreate[i]);
-                        }
-                    }
-                } else {
+                // Add tasks
+                {% if current_user.is_authenticated %}
+                    clearTasksDivs();
                     localStorage.tasks = Number(0);
-                }
+                    $.ajax('{{ url_for('main.get_tasks') }}').done(
+                        function(tasks) {
+                            for(i = 0; i <= tasks.length; i++){
+                                addTask(taskBody=tasks[i].body, taskID=undefined, initialize=true);
+                                if (tasks[i].state == 0)
+                                    completeTask(taskID="task-" + (i+1), initialize=true);
+                            }
+                        }
+                    );
+                {% else %}
+                    if (localStorage.tasks) { 
+                        localStorage.tasks = localStorage.tasks;
+                        tasksToCreate = [];
+                        for (i = 1; i <= Number(localStorage.tasks); i++) {
+                            taskBody = JSON.parse(localStorage["task-" + i.toString()])["text"];
+                            taskState = JSON.parse(localStorage["task-" + i.toString()])["complete"];
+                            lastTime = new Date(Date.parse(localStorage.lastTime));
+                            if (currentTime.getDate() == lastTime.getDate()) {
+                                addTask(taskBody=taskBody, taskID="task-" + i.toString());
+                                if (taskState == "true") {
+                                    completeTask(taskID="task-" + i);
+                                }
+                            } else {
+                                // Remove the task, it is going to be created now if it is uncomplete
+                                localStorage.removeItem("task-" + i.toString());
+                                if (taskState == "false"){
+                                    tasksToCreate.push(taskBody);
+                                }
+                            }
+                        }
+                        if (tasksToCreate.length > 0){
+                            localStorage.tasks = Number(0);
+                            for (i = 0; i < tasksToCreate.length; i++){
+                                addTask(taskBody=tasksToCreate[i]);
+                            }
+                        }
+                    } else {
+                        localStorage.tasks = Number(0);
+                    }
+                {% endif %}
                 if (localStorage.lastTime) {
                     localStorage.lastTime = localStorage.lastTime ;
                     // check if a pomodoro or break has ended during while the tab was closed
@@ -310,7 +325,7 @@
             }, 1000);
         };
 
-        function addTask (taskBody, taskID) {
+        function addTask (taskBody='', taskID=undefined, initialize=false) {
             if (taskID !== undefined){
                 labelID = "label-" + taskID;
                 buttonID = "button-" + taskID;
@@ -343,7 +358,7 @@
             buttonDone.setAttribute("id", buttonID);
             buttonDone.setAttribute("class", "btn btn-success btn-task");
             buttonDone.setAttribute("type", "button");
-            buttonDone.setAttribute("onclick", "completeTask(this.id.split('button-')[1])");
+            buttonDone.setAttribute("onclick", "completeTask(taskID=this.id.split('button-')[1])");
             // buttonDone.setAttribute("style", "border-top-left-radius: 0px; border-bottom-left-radius: 0px; \
             //         vertical-align: middle; height: 30px;");
             var gliph = document.createElement("span");
@@ -368,12 +383,15 @@
             }
             localStorage.lastTime = new Date();
             // Store the current task in the database if user has login
-            {% if current_user.is_authenticated %}
-                $.post('/add-task', {body:taskBody});
-            {% endif %}
+            if (!initialize) {
+                {% if current_user.is_authenticated %}
+                    $.post('/add-task', {body:taskBody});
+                {% endif %}
+            }
         }
 
-        function completeTask(taskID) {
+        function completeTask(taskID=undefined, initialize=false) {
+            console.log(taskID);
             document.getElementById("label-" + taskID).setAttribute("class",
                                              "col-xs-8 div-task label-task completed");
             document.getElementById("button-" + taskID).setAttribute("class",
@@ -381,6 +399,21 @@
             taskText = JSON.parse(localStorage[taskID])["text"];
             localStorage.setItem(taskID, JSON.stringify({"text": taskText, "complete": "true"}));
             localStorage.lastTime = new Date();
+            // Set as completed the current task in the database if user has login
+            if (!initialize) {
+                {% if current_user.is_authenticated %}
+                    $.post('/complete-task', {body:taskText});
+                {% endif %}
+            }
+        }
+
+        function clearTasksDivs() {
+            var tasksContainer = document.getElementById("tasks-container");
+            if (tasksContainer.childNodes.length > 1){
+                for(i = 2; i < tasksContainer.childNodes.length; i++) {
+                    tasksContainer.removeChild(tasksContainer.childNodes[i]);
+                }
+            }
         }
 
         

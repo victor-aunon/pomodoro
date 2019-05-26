@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import OrderedDict
 from random import randint
 from textblob import TextBlob
+from sqlalchemy import and_
 from flask import render_template, url_for, g, flash, redirect, current_app, request, jsonify
 from flask_login import current_user, login_required
 from flask_babel import get_locale, _, lazy_gettext as _l
@@ -32,12 +33,25 @@ def add_task():
 
 @bp.route('/complete-task', methods=['POST'])
 @login_required
-def add_task():
-    task = Task(user_id=current_user.id, timestamp=datetime.utcnow(),
-                body=request.form['body'], state=True)
-    db.session.add(task)
-    db.session.commit()
-    return jsonify({'status': 'Completed'})
+def complete_task():
+    task = Task.query.filter(and_(Task.user_id == current_user.id, Task.body == request.form['body'], Task.state == True)).first()
+    if task is None:
+        return render_template('index.html', quote=quotes.quotes[randint(1, len(quotes.quotes))])
+    else:
+        task.state=False
+        db.session.add(task)
+        db.session.commit()
+        return jsonify({'status': 'Completed'})
+
+
+@bp.route('/get-tasks')
+@login_required
+def get_tasks():
+    active_tasks = Task.query.filter(and_(Task.user_id == current_user.id, Task.state == True)).order_by(Task.timestamp.desc())
+    incompleted_tasks_today = Task.query.filter(and_(Task.user_id == current_user.id, Task.state == False,
+                            Task.timestamp >= datetime.utcnow() - timedelta(hours=12))).order_by(Task.timestamp.desc())
+    tasks = active_tasks.all() + incompleted_tasks_today.all()
+    return jsonify([{'body': t.body, 'state': t.state} for t in tasks])
 
 
 # @bp.route('/user/<username>')
